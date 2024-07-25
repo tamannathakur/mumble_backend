@@ -11,8 +11,12 @@ const userSchema = new mongoose.Schema({
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (this.isModified('password')) {
-    const salt = await bcryptjs.genSalt(10);
-    this.password = await bcryptjs.hash(this.password, salt);
+    try {
+      const salt = await bcryptjs.genSalt(10);
+      this.password = await bcryptjs.hash(this.password, salt);
+    } catch (error) {
+      return next(error); // Pass the error to the next middleware
+    }
   }
   next();
 });

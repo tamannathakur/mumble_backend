@@ -1,7 +1,6 @@
-// routes/users.js
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
+const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -15,13 +14,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword });
-
+    const user = new User({ name, email, password });
     await user.save();
 
     res.status(201).json(user);
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -36,14 +34,15 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await user.comparePassword(password); // Use comparePassword method
     if (!isMatch) {
       return res.status(400).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user._id }, 'your_jwt_secret');
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET); // Use environment variable for secret
     res.status(200).json({ token });
   } catch (error) {
+    console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
