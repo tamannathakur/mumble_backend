@@ -12,6 +12,7 @@ const outfitSchema = new mongoose.Schema({
       webUrl: { type: String, required: true },
     },
   ],
+  tags: { type: [String], required: true }, // Add tags field as an array of strings
 });
 
 const Outfit = mongoose.model('Outfit', outfitSchema);
