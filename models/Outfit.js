@@ -1,18 +1,17 @@
-// models/Outfit.js
 const mongoose = require('mongoose');
 
-const itemSchema = new mongoose.Schema({
-  name: String,
-  price: String,
-  image: String,
-  id: String,
-  webUrl: String,
-});
-
 const outfitSchema = new mongoose.Schema({
-  name: String,
-  image: String,
-  items: [itemSchema],
+  name: { type: String, required: true },
+  image: { type: String, required: true },
+  items: [
+    {
+      name: { type: String, required: true },
+      price: { type: String, required: true },
+      image: { type: String, required: true },
+      id: { type: String, required: true },
+      webUrl: { type: String, required: true },
+    },
+  ],
 });
 
 const Outfit = mongoose.model('Outfit', outfitSchema);
