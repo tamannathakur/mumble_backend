@@ -4,7 +4,7 @@ const router = express.Router();
 const Outfit = require('../models/Outfit');
 
 // Get all outfits
-router.get('/api/outfits', async (req, res) => {
+router.get('/', async (req, res) => { // Change from '/api/outfits' to '/'
   try {
     const outfits = await Outfit.find();
     res.json(outfits);
@@ -14,7 +14,7 @@ router.get('/api/outfits', async (req, res) => {
 });
 
 // Add a new outfit (for seeding purposes)
-router.post('/api/outfits', async (req, res) => {
+router.post('/', async (req, res) => { // Change from '/api/outfits' to '/'
   const outfit = new Outfit({
     name: req.body.name,
     image: req.body.image,
