@@ -11,9 +11,6 @@ const app = express();
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Optionally, serve static files from the 'public' directory
-// app.use(express.static('public'));
-
 // Connect to MongoDB
 const dbUri = process.env.MONGODB_URI;
 mongoose.connect(dbUri)
@@ -23,7 +20,7 @@ mongoose.connect(dbUri)
 // Register routes
 app.use('/api/users', usersRouter);
 app.use('/api/outfits', outfitsRouter);
-app.use('/api/upload', uploadRoute); // Adjusted path for clarity
+app.use('/api/upload', uploadRoute); // This will make the upload route available at /api/upload
 
 // Error-handling middleware
 app.use((err, req, res, next) => {

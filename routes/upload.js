@@ -1,15 +1,15 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const uploadImageToFirebase = require('../imageUpload'); // Ensure this path is correct
+const bucket = require('../firebaseAdmin'); // Ensure this path is correct
 
 const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(), // Store files in memory
-  limits: { fileSize: 5 * 1024 * 1024 }, // 50MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, 
 });
 
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => { // Note the path is '/'
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
