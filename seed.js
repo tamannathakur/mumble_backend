@@ -58,7 +58,7 @@ const outfits = [
     image: '../frontend/assets/card5.png',
     items: [
       { name: 'Off-White Overcoat', price: 'Rs 1,999', image: '../frontend/assets/item12.png', id: '26556690', webUrl: 'https://www.myntra.com/topwear/stylecast/stylecast-off-white-double-breasted-overcoat/26556690/buy' },
-      { name: 'Bodycon Mini Dress', price: 'Rs. 1,239', image: '../frontend/assets/iem13.png', id: '30081398', webUrl: 'https://www.myntra.com/dress/showoff/showoff-sleeveless-bodycon-mini-dress/30081398/buy' },
+      { name: 'Bodycon Mini Dress', price: 'Rs. 1,239', image: '../frontend/assets/item13.png', id: '30081398', webUrl: 'https://www.myntra.com/dress/showoff/showoff-sleeveless-bodycon-mini-dress/30081398/buy' },
       { name: 'Laptop Shoulder Bag', price: 'Rs. 1,528', image: '../frontend/assets/item14.png', id: '23023886', webUrl: 'https://www.myntra.com/bags/lino-perros/lino-perros-women-textured-structured-laptop-shoulder-bag/23023886/buy' },
     ],
     tags: ['Business', 'Formal', 'Professional'], // Add tags here
