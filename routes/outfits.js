@@ -12,8 +12,15 @@ const extractMyntraItemDetails = async (itemLink) => {
   try {
     const { data } = await axios.get(itemLink);
     const $ = cheerio.load(data);
-    const imageUrl = $('img').attr('src'); // Adjust selector as needed
-    const price = $('.price').text(); // Adjust selector as needed
+
+    // Extracting image URL
+    const imageUrl = $('.image-grid-image').css('background-image')
+      .replace(/^url\(['"]/, '')
+      .replace(/['"]\)$/, '');
+
+    // Extracting price
+    const price = $('strong[fs_event_type="click"]').text().trim();
+
     return { imageUrl, price };
   } catch (error) {
     console.error('Error extracting Myntra item details:', error);
