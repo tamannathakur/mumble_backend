@@ -5,9 +5,9 @@ const admin = require('../firebaseAdmin'); // Ensure correct path
 const multer = require('multer');
 const path = require('path');
 const { parseMyntraLink } = require('../utils/myntraParser');
+const { bucket } = require('../firebaseAdmin'); 
 
 // Initialize Firebase Storage bucket
-const bucket = admin.bucket();
 
 // Initialize multer for handling file uploads
 const upload = multer({
