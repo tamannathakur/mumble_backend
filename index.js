@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config(); // Load environment variables from .env file
-
+const uploadRoute = require('./routes/upload');
 const app = express();
 
 // Middleware to parse JSON bodies
@@ -20,6 +20,8 @@ const outfitsRouter = require('./routes/outfits');
 // Register routes
 app.use('/api/users', usersRouter);
 app.use('/api/outfits', outfitsRouter);
+app.use('/api', uploadRoute); // Adjust the path if necessary
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
