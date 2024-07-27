@@ -1,68 +1,48 @@
+// routes/outfits.js
 const express = require('express');
-const router = express.Router();
+const axios = require('axios');
+const cheerio = require('cheerio');
+const bucket = require('../firebaseAdmin'); // Ensure correct path
 const Outfit = require('../models/Outfit');
-const admin = require('../firebaseAdmin'); // Ensure correct path
-const multer = require('multer');
+const router = express.Router();
 const path = require('path');
-const { parseMyntraLink } = require('../utils/myntraParser');
-const { bucket } = require('../firebaseAdmin'); 
 
-// Initialize Firebase Storage bucket
+// Function to extract details from Myntra link
+const extractMyntraItemDetails = async (itemLink) => {
+  try {
+    const { data } = await axios.get(itemLink);
+    const $ = cheerio.load(data);
+    const imageUrl = $('img').attr('src'); // Adjust selector as needed
+    const price = $('.price').text(); // Adjust selector as needed
+    return { imageUrl, price };
+  } catch (error) {
+    console.error('Error extracting Myntra item details:', error);
+    return { imageUrl: '', price: '' };
+  }
+};
 
-// Initialize multer for handling file uploads
-const upload = multer({
-  storage: multer.memoryStorage(), // Store files in memory
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-});
+// Route to handle outfit creation
+router.post('/addOutfit', async (req, res) => {
+  const { photo, name, tags, items } = req.body;
 
-// Function to upload image to Firebase Storage
-const uploadImageToFirebase = async (buffer, destination) => {
-  const blob = bucket.file(destination);
+  // Upload the outfit photo to Firebase Storage
+  const photoBuffer = Buffer.from(photo, 'base64');
+  const photoName = `outfits/${Date.now()}.jpg`;
+  const blob = bucket.file(photoName);
   const blobStream = blob.createWriteStream({
-    resumable: false, // Non-resumable for simplicity
+    resumable: false,
     metadata: {
       contentType: 'image/jpeg',
     },
   });
 
-  return new Promise((resolve, reject) => {
-    blobStream.on('error', (err) => {
-      console.error('Blob stream error:', err);
-      reject(err);
-    });
-
-    blobStream.on('finish', () => {
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${destination}`;
-      resolve(publicUrl);
-    });
-
-    blobStream.end(buffer);
+  blobStream.on('error', (err) => {
+    console.error('Blob stream error:', err);
+    return res.status(500).json({ error: 'Error uploading photo' });
   });
-};
 
-// Route to handle outfit creation
-router.post('/addOutfit', upload.single('photo'), async (req, res) => {
-  const { name, tags, items } = req.body;
-  const photo = req.file;
-
-  try {
-    // Handle photo upload
-    const photoDestination = `outfits/${Date.now()}.jpg`;
-    const photoUrl = await uploadImageToFirebase(photo.buffer, photoDestination);
-
-    // Function to extract details from Myntra link
-    const extractMyntraItemDetails = async (itemLink) => {
-      try {
-        const { data } = await axios.get(itemLink);
-        const $ = cheerio.load(data);
-        const imageUrl = $('img.product-image').attr('src'); // Adjust selector as needed
-        const price = $('.price').text(); // Adjust selector as needed
-        return { imageUrl, price };
-      } catch (error) {
-        console.error('Error extracting Myntra item details:', error);
-        return { imageUrl: '', price: '' };
-      }
-    };
+  blobStream.on('finish', async () => {
+    const photoUrl = `https://storage.googleapis.com/${bucket.name}/${photoName}`;
 
     // Extract item details for each item
     const itemsWithDetails = await Promise.all(
@@ -70,8 +50,8 @@ router.post('/addOutfit', upload.single('photo'), async (req, res) => {
         const { imageUrl, price } = await extractMyntraItemDetails(item.itemLink);
         return {
           ...item,
-          imageUrl, // Store extracted image URL
-          price,    // Store extracted price
+          imageUrl,
+          price,
         };
       })
     );
@@ -84,12 +64,15 @@ router.post('/addOutfit', upload.single('photo'), async (req, res) => {
       items: itemsWithDetails,
     });
 
-    const newOutfit = await outfit.save();
-    res.status(201).json(newOutfit);
-  } catch (err) {
-    console.error('Error creating outfit:', err);
-    res.status(500).json({ message: err.message });
-  }
+    try {
+      const newOutfit = await outfit.save();
+      res.status(201).json(newOutfit);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  blobStream.end(photoBuffer);
 });
 
 module.exports = router;
