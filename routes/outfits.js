@@ -5,6 +5,9 @@ const cheerio = require('cheerio');
 const admin = require('../firebaseAdmin'); // Ensure correct path
 const Outfit = require('../models/Outfit');
 const router = express.Router();
+const path = require('path');
+const { parseMyntraLink } = require('../utils/myntraParser');
+
 // Get all outfits
 router.get('/', async (req, res) => { // Change from '/api/outfits' to '/'
   try {
@@ -20,37 +23,34 @@ router.get('/', async (req, res) => { // Change from '/api/outfits' to '/'
 router.post('/addOutfit', async (req, res) => {
   const { photo, name, tags, items } = req.body;
 
-  // Extract item details from Myntra links
-  const updatedItems = await Promise.all(items.map(async (item) => {
-    if (item.itemLink) {
-      try {
-        const response = await axios.get(item.itemLink);
-        const $ = cheerio.load(response.data);
-        const imageUrl = $('img.product-image').attr('src'); // Adjust selector based on Myntra's structure
-        const price = $('span.product-price').text(); // Adjust selector based on Myntra's structure
-
-        return { ...item, itemImage: imageUrl, itemPrice: price };
-      } catch (error) {
-        console.error('Error fetching item details:', error);
-        return { ...item, itemImage: '', itemPrice: '' };
-      }
-    }
-    return item;
-  }));
-
-  // Save outfit to database
   try {
-    const newOutfit = new Outfit({
-      photo,
+    // Handle photo upload
+    const photoPath = path.join(__dirname, 'uploads', 'outfit.jpg');
+    const photoDestination = `outfits/${Date.now()}.jpg`;
+    await uploadImageToFirebase(photoPath, photoDestination);
+
+    // Extract item details from Myntra links
+    const updatedItems = await Promise.all(items.map(async (item) => {
+      if (item.itemLink) {
+        const { imageUrl, price } = await parseMyntraLink(item.itemLink);
+        return { ...item, imageUrl, price };
+      }
+      return item;
+    }));
+
+    // Create new outfit
+    const outfit = new Outfit({
+      photo: `https://storage.googleapis.com/${bucket.name}/${photoDestination}`,
       name,
       tags,
       items: updatedItems,
     });
-    await newOutfit.save();
+
+    const newOutfit = await outfit.save();
     res.status(201).json(newOutfit);
-  } catch (error) {
-    console.error('Error saving outfit:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+  } catch (err) {
+    console.error('Error creating outfit:', err);
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -72,6 +72,17 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+const uploadImageToFirebase = async (filePath, destination) => {
+  await bucket.upload(filePath, {
+    destination: destination,
+    resumable: true, // Allow resumable uploads
+    metadata: {
+      contentType: 'image/jpeg',
+    },
+  });
+  console.log(`${filePath} uploaded to ${destination}`);
+};
 
 
 module.exports = router;
