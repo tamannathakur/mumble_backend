@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const { Storage } = require('@google-cloud/storage');
 const bucket = require('../firebaseAdmin'); // Ensure this path is correct
 
 const router = express.Router();
@@ -31,7 +32,7 @@ router.post('/', upload.single('file'), async (req, res) => { // Note the path i
     });
 
     blobStream.on('finish', () => {
-      const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
+      const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
       res.status(200).json({ url: publicUrl });
     });
 
