@@ -42,6 +42,17 @@ router.post('/addOutfit', async (req, res) => {
     })
   );
 
+  // Route to get all outfits
+router.get('/', async (req, res) => {
+  try {
+    const outfits = await Outfit.find();
+    res.json(outfits);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
   // Create and save the new outfit
   const outfit = new Outfit({
     name,
