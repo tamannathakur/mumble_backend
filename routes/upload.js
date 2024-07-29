@@ -30,12 +30,17 @@ router.post('/', upload.single('file'), async (req, res) => { // Note the path i
       console.error('Blob stream error:', err);
       return res.status(500).json({ error: 'Error uploading file' });
     });
-
+    
     blobStream.on('finish', () => {
       const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
       res.status(200).json({ url: publicUrl });
     });
-
+    
+  /*  blobStream.on('finish', () => {
+      const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
+      res.status(200).json({ url: publicUrl });
+    });
+*/
     blobStream.end(req.file.buffer);
   } catch (error) {
     console.error('Error uploading image:', error);
