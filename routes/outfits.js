@@ -1,10 +1,7 @@
-// routes/outfits.js
 const express = require('express');
-const axios = require('axios');
-const cheerio = require('cheerio');
+const puppeteer = require('puppeteer');
 const Outfit = require('../models/Outfit');
 const router = express.Router();
-const puppeteer = require('puppeteer'); // Import puppeteer
 
 router.get('/', async (req, res) => {
   try {
@@ -14,8 +11,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-
 
 // Route to handle outfit creation
 router.post('/addOutfit', async (req, res) => {
@@ -50,7 +45,7 @@ router.post('/addOutfit', async (req, res) => {
   // Create and save the new outfit
   const outfit = new Outfit({
     name,
-    photo, // Directly use the URL sent from the frontend
+    photo,
     tags,
     items: itemsWithDetails,
   });
@@ -61,11 +56,12 @@ router.post('/addOutfit', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
-}); 
+});
+
 // Function to extract details from Myntra link using Puppeteer
 const extractDetails = async (itemLink) => {
   try {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({ headless: false }); // Run in non-headless mode for debugging
     const page = await browser.newPage();
 
     // Set a common user-agent
@@ -73,6 +69,10 @@ const extractDetails = async (itemLink) => {
 
     // Increase navigation timeout to 60 seconds
     await page.goto(itemLink, { waitUntil: 'networkidle2', timeout: 60000 });
+
+    // Wait for the necessary elements to be available
+    await page.waitForSelector('span.pdp-price strong', { timeout: 10000 });
+    await page.waitForSelector('div.image-grid-image', { timeout: 10000 });
 
     // Extract image and price
     const details = await page.evaluate(() => {
@@ -84,6 +84,8 @@ const extractDetails = async (itemLink) => {
       const imageElement = document.querySelector('div.image-grid-image');
       const imageUrl = imageElement ? imageElement.style.backgroundImage.replace(/^url\(["']/, '').replace(/["']\)$/, '') : '';
 
+      console.log({ priceElement, imageElement, price, imageUrl });
+
       return { price, imageUrl };
     });
 
@@ -94,7 +96,5 @@ const extractDetails = async (itemLink) => {
     return { price: '', imageUrl: '' };
   }
 };
-
-
 
 module.exports = router;
