@@ -61,7 +61,7 @@ router.post('/addOutfit', async (req, res) => {
 // Function to extract details from Myntra link using Puppeteer
 const extractDetails = async (itemLink) => {
   try {
-    const browser = await puppeteer.launch({ headless: false }); // Run in non-headless mode for debugging
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     // Set a common user-agent
@@ -69,10 +69,6 @@ const extractDetails = async (itemLink) => {
 
     // Increase navigation timeout to 60 seconds
     await page.goto(itemLink, { waitUntil: 'networkidle2', timeout: 60000 });
-
-    // Wait for the necessary elements to be available
-    await page.waitForSelector('span.pdp-price strong', { timeout: 10000 });
-    await page.waitForSelector('div.image-grid-image', { timeout: 10000 });
 
     // Extract image and price
     const details = await page.evaluate(() => {
@@ -84,11 +80,10 @@ const extractDetails = async (itemLink) => {
       const imageElement = document.querySelector('div.image-grid-image');
       const imageUrl = imageElement ? imageElement.style.backgroundImage.replace(/^url\(["']/, '').replace(/["']\)$/, '') : '';
 
-      console.log({ priceElement, imageElement, price, imageUrl });
-
       return { price, imageUrl };
     });
 
+    console.log('Extracted Details:', details);
     await browser.close();
     return details;
   } catch (error) {
