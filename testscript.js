@@ -33,5 +33,5 @@ const extractDetails = async (itemLink) => {
   }
 };
 
-const testLink = 'https://www.myntra.com/jeans/kotty/kotty-women-blue-jean-straight-fit-stretchable-jeans/20697592/buy?utm_source=dms_bing_shopping&utm_medium=bing_cpc_shopping&utm_campaign=Bing_Apparel_ShoppingCampaign&msclkid=509f701d1d311601d09c16bbba8e723b&utm_term=4578297737194806&utm_content=Bottomwear-%20Jeans';
+const testLink = 'https://www.myntra.com/Jeans/Hubberholme/Hubberholme-Men-Relaxed-Fit-Clean-Look-Light-Fade-Jeans/27485940/buy';
 extractDetails(testLink);
