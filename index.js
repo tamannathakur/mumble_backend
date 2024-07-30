@@ -5,6 +5,7 @@ require('dotenv').config(); // Load environment variables from .env file
 const uploadRoute = require('./routes/upload');
 const usersRouter = require('./routes/users');
 const outfitsRouter = require('./routes/outfits');
+const profileRoutes = require('./routes/profileRoutes');
 
 const app = express();
 app.use(express.json()); // For parsing application/json
@@ -23,6 +24,7 @@ mongoose.connect(dbUri)
 app.use('/api/users', usersRouter);
 app.use('/api/outfits', outfitsRouter);
 app.use('/api/upload', uploadRoute); // This will make the upload route available at /api/upload
+app.use('/api', profileRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

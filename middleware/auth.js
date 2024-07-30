@@ -7,6 +7,10 @@ const auth = async (req, res, next) => {
     // Extract token from the Authorization header
     const token = req.header('Authorization').replace('Bearer ', '');
     // Verify the token
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // Find the user by ID
     const user = await User.findOne({ _id: decoded.userId });
