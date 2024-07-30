@@ -18,4 +18,25 @@ router.get('/profile', auth, async (req, res) => {
   }
 });
 
+router.put('/preferences', auth, async (req, res) => {
+  const { email, userPreferences } = req.body;
+
+  try {
+    // Find the user by email and update preferences
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { email: email },
+      { userPreferences: userPreferences },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedProfile) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(updatedProfile);
+  } catch (error) {
+    console.error('Error updating preferences:', error);
+    res.status(500).json({ message: 'Failed to update preferences' });
+  }
+});
 module.exports = router;
