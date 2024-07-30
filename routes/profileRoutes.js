@@ -26,7 +26,7 @@ router.put('/preferences', auth, async (req, res) => {
     const updatedProfile = await Profile.findOneAndUpdate(
       { email: email },
       { userPreferences: userPreferences },
-      { new: true } // Return the updated document
+      { new: true, runValidators: true  } // Return the updated document
     );
 
     if (!updatedProfile) {
