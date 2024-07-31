@@ -37,14 +37,14 @@ const profileSchema = new Schema({
       {
         tag: { type: String, default: 'female' },
         weight: { type: Number, default: 0 },
-        lastUpdated: { type: Date, default: Date.now }
+        lastUpdated: { type: Date, default: new Date().toISOString() }
       }
     ],
     default: [
       {
         tag: 'female',
         weight: 0,
-        lastUpdated: Date.now
+        lastUpdated: new Date().toISOString()
       }
     ]
   }
