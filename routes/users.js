@@ -3,6 +3,7 @@ const router = express.Router();
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Profile = require('../models/Profile');
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -16,6 +17,14 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10); 
     const user = new User({ name, email, password });
     await user.save();
+
+    const profile = new Profile({
+      email, // Same email as user
+      // You can set default values for other fields here if necessary
+    });
+    await profile.save();
+
+    
     const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET);
     res.status(201).json({ token, user: { name: user.name, email: user.email } });
     res.status(201).json(user);
