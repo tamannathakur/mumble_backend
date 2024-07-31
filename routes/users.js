@@ -16,7 +16,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'User already exists' });
     }
     const hashedPassword = await bcryptjs.hash(password, 10); 
-    const user = new User({ name, email, password });
+    const user = new User({ name, email, password : hashedPassword});
     await user.save();
 
     const profile = new Profile({
@@ -28,8 +28,6 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET);
     res.status(201).json({ token, user: { name: user.name, email: user.email } });
-    res.status(201).json({ user});
-
   } catch (error) {
     console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal Server Error' });
@@ -53,7 +51,6 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET);
     res.status(200).json({ token, user: { name: user.name, email: user.email } });
-    res.status(201).json({ user });
   } catch (error) {
     console.error(error); // Log the error for debugging
     res.status(500).json({ error: 'Internal Server Error' });
