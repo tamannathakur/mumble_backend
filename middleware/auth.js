@@ -4,10 +4,15 @@ const User = require('../models/User');
 
 const auth = async (req, res, next) => {
   try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Authorization header is missing' });
+    }
     console.log('Auth middleware called');
 
     // Extract token from the Authorization header
-    const token = req.header('Authorization').replace('Bearer ', '');
+    const token = authHeader.replace('Bearer ', '');
     // Verify the token
     if (!token) {
       return res.status(401).json({ error: 'No token provided' });
