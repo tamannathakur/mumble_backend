@@ -32,11 +32,22 @@ const profileSchema = new Schema({
     description: String,
     image: String
   }],
-  userPreferences: [{
-    tag: String,
-    weight: Number,
-    lastUpdated: { type: Date, default: Date.now }
-  }]
+  userPreferences: {
+    type: [
+      {
+        tag: { type: String, default: 'female' },
+        weight: { type: Number, default: 0 },
+        lastUpdated: { type: Date, default: Date.now }
+      }
+    ],
+    default: [
+      {
+        tag: 'female',
+        weight: 0,
+        lastUpdated: Date.now
+      }
+    ]
+  }
 });
 
 const Profile = mongoose.model('Profile', profileSchema);
