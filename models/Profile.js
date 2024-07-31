@@ -1,38 +1,43 @@
-// models/Profile.js
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
-const badgeSchema = new Schema({
-  image: { type: String, required: true },
-  description: { type: String, required: true },
+const itemSchema = new Schema({
+  itemName: String,
+  itemLink: String,
+  itemId: String,
+  imageUrl: String,  // Added field for item image URL
+  price: String,     // Added field for item price
+});
+
+const outfitSchema = new Schema({
+  id: String,
+  name: { type: String, required: true },
+  photo: { type: String, required: true },
+  tags: [String],
+  items: [itemSchema],
 });
 
 const profileSchema = new Schema({
   email: { type: String, required: true, unique: true },
-  savedPosts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
-  uploadedPosts: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
   points: { type: Number, default: 0 },
   vouchers: [{
     name: String,
     expires: String,
     expired: Boolean,
   }],
-  outfits: [{
-    id: String,
+  outfits: [outfitSchema],
+  savedOutfits: [outfitSchema],
+  badges: [{
     name: String,
-    likes: Number,
-    image: String,
+    description: String,
+    image: String
   }],
-  savedOutfits: [{
-    id: String,
-    name: String,
-    likes: Number,
-    image: String,
-  }],
-  badges: [badgeSchema],
-  userPreferences: [String],
+  userPreferences: [{
+    tag: String,
+    weight: Number,
+    lastUpdated: { type: Date, default: Date.now }
+  }]
 });
 
 const Profile = mongoose.model('Profile', profileSchema);
-
-module.exports = Profile;
+module.exports = Profile;

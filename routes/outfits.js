@@ -70,6 +70,9 @@ const extractDetails = async (itemLink) => {
     // Increase navigation timeout to 60 seconds
     await page.goto(itemLink, { waitUntil: 'networkidle2', timeout: 60000 });
 
+    await page.waitForSelector('span.pdp-price strong');
+    await page.waitForSelector('div.image-grid-image');
+    
     // Extract image and price
     const details = await page.evaluate(() => {
       // Extract price

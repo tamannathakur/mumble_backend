@@ -39,4 +39,58 @@ router.put('/preferences', auth, async (req, res) => {
     res.status(500).json({ message: 'Failed to update preferences' });
   }
 });
+
+router.post('/swipeRight', async (req, res) => {
+  const { email, tags } = req.body;
+
+  try {
+    const profile = await Profile.findOne({ email });
+    if (!profile) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    tags.forEach(tag => {
+      const preference = profile.userPreferences.find(pref => pref.tag === tag);
+      if (preference) {
+        preference.weight += 1;
+        preference.lastUpdated = new Date();
+      } else {
+        profile.userPreferences.push({ tag, weight: 1, lastUpdated: new Date() });
+      }
+    });
+
+    await profile.save();
+    res.status(200).json(profile);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Endpoint for left swipe
+router.post('/swipeLeft', async (req, res) => {
+  const { email, tags } = req.body;
+
+  try {
+    const profile = await Profile.findOne({ email });
+    if (!profile) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    tags.forEach(tag => {
+      const preference = profile.userPreferences.find(pref => pref.tag === tag);
+      if (preference) {
+        preference.weight -= 1;
+        if (preference.weight <= 0) {
+          profile.userPreferences = profile.userPreferences.filter(pref => pref.tag !== tag);
+        }
+      }
+    });
+
+    await profile.save();
+    res.status(200).json(profile);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;
